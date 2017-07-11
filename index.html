@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>lande</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000;
+				color: #fff;
+				margin: 0;
+				overflow: hidden;
+			}
+            #fullScreen{
+                position: absolute;
+                width: 62px;
+                height:62px;
+                background: url(img/menuicon.png) no-repeat;
+                z-index: 999;
+                background-position: -130px -660px;top: 20px;right: 20px;
+            }
+            #tips{
+                position: absolute;
+                width: 240px;
+                height: 80px;
+                line-height: 80px;
+                top: 50%;
+                left: 50%;
+                margin-top: -40px;
+                margin-left: -120px;
+                opacity: 0;
+                border-radius:2px ;
+                border: 1px solid rgba(150,150,150,0.8);
+                background-color: rgba(50,50,50,0.2);
+                color: #ffffff;
+                font-size: 40px;
+                text-align: center;
+            }
+            #VR{
+                position: absolute;
+                width: 62px;
+                height:62px;
+                background: url(img/menuicon.png) no-repeat;
+                z-index: 999;
+                background-position: -0px -590px;
+                top: 100px;
+                right: 20px;
+            }
+		</style>
+	</head>
+	<body>
+		<div id="container"></div>
+        <div id="fullScreen"></div>
+        <div id="tips">声音已开启</div>
+        <audio autoplay loop src="audio/test.mp3" id="audio"></audio>
+        <div id="VR"></div>
+		<script src="js/three.min.js"></script>
+		<!--<script src="js/Projector.js"></script>-->
+		<script src="js/tween.js"></script>
+		<script src="js/miaov.js"></script>
+		<script src="js/StereoEffect.js" type="text/javascript" charset="utf-8"></script>
+		<!--<script src="js/OrbitControls.js" type="text/javascript" charset="utf-8"></script>-->
+		<!--<script src="js/THREEx.FullScreen.js" type="text/javascript" charset="utf-8"></script>-->
+		<script src="js/DeviceOrientationControls.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+			var container;
+			var camera, scene, renderer;
+			var target = new THREE.Vector3();
+			var mesh;
+			var timer;
+			var oFullScreen = document.getElementById('fullScreen'),
+                oAudio = document.getElementById('audio'),
+                oTips = document.getElementById('tips'),
+                onDevice = document.getElementById('VR');
+			var Devices, effect;
+			var lon = - 90,
+				lat = 0,
+                phi = 0,
+                theta,
+				onPointerDownPointerX,
+                onPointerDownPointerY,
+                onPointerDownLon,
+            	onPointerDownLat;
+			var isUserInteracting = false,
+                isDeviceing = false,
+                isChanged = false,
+			    Status = 0;
+
+			init();
+            animate();
+			function init(){
+			    container = document.getElementById('container');
+			    //scene
+			    scene = new THREE.Scene();
+
+				//camera
+				camera = new THREE.PerspectiveCamera(140, window.innerWidth / window.innerHeight, 0.1, 10000);
+				camera.position.set(0,999,0);
+                target.set(0, 0, 0);
+				camera.lookAt(target);
+
+                //light
+                var ambientLight = new THREE.AmbientLight(0xffffff);
+                scene.add(ambientLight);
+
+				//render
+				renderer = new THREE.WebGLRenderer({
+					antialias: true
+				});
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				container.appendChild(renderer.domElement);
+
+				//panorama
+				var texture = new THREE.TextureLoader().load('lande/c01.jpg',function(){
+					var geometry = new THREE.SphereGeometry(1000, 100, 100);
+					var material = new THREE.MeshLambertMaterial({
+						map: texture,
+						side: THREE.DoubleSide
+					});
+					mesh = new THREE.Mesh(geometry, material);
+					scene.add(mesh);
+					mesh.position.set(0, 0, 0);
+					//drop
+                    setTimeout(function(){
+                        new TWEEN.Tween(camera.position)
+                            .to({ x: 0, y: 0, z: 0 }, 3000)
+                            .easing(TWEEN.Easing.Exponential.InOut)
+                            .start().onComplete(function(){
+                                Status = 1;
+                            });
+                        new TWEEN.Tween(target)
+                            .to({ x: 0, y: 0, z: -500}, 3000)
+                            .easing(TWEEN.Easing.Exponential.InOut)
+                            .start().onComplete(function(){
+
+                        	});
+                        clearInterval(timer);
+                        timer = setInterval(function(){
+                            camera.fov-=0.2;
+                            camera.updateProjectionMatrix();
+                            if(camera.fov <= 60){
+                                camera.fov = 60;
+                                camera.updateProjectionMatrix();
+                                clearInterval(timer);
+                            }
+                        },1)
+                    },1000);
+				});
+
+				//Devices
+                Devices = new THREE.DeviceOrientationControls(camera);
+                Devices.connect();
+
+                //effect
+                effect = new THREE.StereoEffect(renderer);
+                effect._stereo.eyeSep = 0.064;
+                effect.setSize(window.innerWidth, window.innerHeight);
+
+                //event
+                renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
+                renderer.domElement.addEventListener('mousemove', onDocumentMouseMove, false);
+                renderer.domElement.addEventListener('mouseup', onDocumentMouseUp, false);
+                renderer.domElement.addEventListener('mousewheel', onDocumentMouseWheel, false);
+                renderer.domElement.addEventListener('touchstart', onDocumentTouchStart, false );
+                renderer.domElement.addEventListener('touchmove', onDocumentTouchMove, false );
+
+                oFullScreen.addEventListener('click', fullScreen, false);
+                onDevice.addEventListener('click', controlDevice, false);
+			}
+
+            function onDocumentMouseDown(event){
+                event.preventDefault();
+                isUserInteracting =  true;
+                onPointerDownPointerX = event.clientX;
+                onPointerDownPointerY = event.clientY;
+                onPointerDownLon = lon;
+                onPointerDownLat = lat;
+            }
+
+            function onDocumentMouseMove(event){
+                if(isUserInteracting === true){
+                    lon = (onPointerDownPointerX - event.clientX) * 0.1 + onPointerDownLon;
+                    lat = (event.clientY - onPointerDownPointerY) * 0.1 + onPointerDownLat;
+                }
+            }
+
+            function onDocumentMouseUp(){
+                isUserInteracting = false;
+            }
+
+            function onDocumentMouseWheel(event){
+                camera.fov -= event.wheelDeltaY * 0.05;
+                camera.updateProjectionMatrix();
+            }
+
+            function onDocumentTouchStart(event){
+                if(event.touches.length == 1){
+                    event.preventDefault();
+                    onPointerDownPointerX = event.touches[0].pageX;
+                    onPointerDownPointerY = event.touches[0].pageY;
+                    onPointerDownLon = lon;
+                    onPointerDownLat = lat;
+                }
+            }
+
+            function onDocumentTouchMove(event){
+                if(event.touches.length == 1){
+                    event.preventDefault();
+                    lon = (onPointerDownPointerX - event.touches[0].pageX) * 0.1 + onPointerDownLon;
+                    lat = (event.touches[0].pageY - onPointerDownPointerY) * 0.1 + onPointerDownLat;
+                }
+            }
+
+            function fullScreen(){
+                if(oAudio.paused){
+                    oTips.innerHTML = '声音已开启';
+                    tweenMove(oTips,{'opacity':100},1000,'linear',function(){
+                        tweenMove(oTips,{'opacity':0},1000,'linear');
+                    });
+                    oAudio.play();
+                }else{
+                    oTips.innerHTML = '声音已关闭';
+                    tweenMove(oTips,{'opacity':100},500,'linear',function(){
+                        tweenMove(oTips,{'opacity':0},500,'linear');
+                    });
+                    oAudio.pause();
+                }
+            }
+
+            function controlDevice(){
+                if (isDeviceing === false) {
+                    isDeviceing = true;
+                    oTips.innerHTML = "开启陀螺仪";
+                    tweenMove(oTips,{'opacity':100},1000,'linear',function(){
+                        tweenMove(oTips,{'opacity':0},1000,'linear');
+                    });
+                } else {
+                    isDeviceing = false;
+                    oTips.innerHTML = "关闭陀螺仪";
+                    tweenMove(oTips,{'opacity':100},500,'linear',function(){
+                        tweenMove(oTips,{'opacity':0},500,'linear');
+                    });
+                }
+            }
+
+			function animate(){
+                requestAnimationFrame(animate);
+                if(isDeviceing === false){
+                    camera.lookAt( target );
+                }
+                render();
+                TWEEN.update();
+
+                if(isDeviceing === false && Status === 1){
+                    lat = Math.max(-89, Math.min(89, lat));
+                    phi = THREE.Math.degToRad(90 - lat);
+                    theta = THREE.Math.degToRad(lon);
+                    target.x = 500 * Math.sin(phi) * Math.cos(theta);
+                    target.y = 500 * Math.cos(phi);
+                    target.z = 500 * Math.sin(phi) * Math.sin(theta);
+                }else{
+                    if(Status === 1){
+                        Devices.update();
+                    }
+                }
+			}
+
+			function render(){
+			    if(isDeviceing === false){
+                    renderer.render(scene, camera);
+                    if(isChanged){
+                        renderer.setSize( window.innerWidth, window.innerHeight );
+                        isChanged = false;
+                    }
+                }else{
+			        effect.render(scene, camera);
+                    if(!isChanged){
+                        effect.setSize( window.innerWidth, window.innerHeight );
+                        isChanged = true;
+                    }
+                }
+			}
+		</script>
+	</body>
+</html>
