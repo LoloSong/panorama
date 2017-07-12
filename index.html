@@ -85,6 +85,8 @@
                 isDeviceing = false,
                 isChanged = false,
 			    Status = 0;
+			var winWidth = window.innerWidth,
+                winHeight = window.innerHeight;
 
 			init();
             animate();
@@ -168,7 +170,6 @@
                 onDevice.addEventListener('click', controlDevice, false);
 
                 window.addEventListener('resize', onWindowResize, false);
-                window.addEventListener('orientationchange', onorientationchange, false);
 			}
 
             function onDocumentMouseDown(event){
@@ -247,18 +248,16 @@
             }
 
             function onWindowResize(){
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize( window.innerWidth, window.innerHeight );
-                effect.setSize( window.innerWidth, window.innerHeight );
+                var resizeWidth = window.innerWidth;
+                var resizeHeight = window.innerHeight;
+                if(winWidth != resizeWidth){
+                    camera.aspect = resizeWidth / resizeHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(resizeWidth, resizeHeight);
+                    effect.setSize(resizeWidth, resizeHeight);
+                    winWidth = resizeWidth;
+                }
 			}
-
-			function onorientationchange(){
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize( window.innerWidth, window.innerHeight);
-                effect.setSize( window.innerWidth, window.innerHeight);
-            }
 
 			function animate(){
                 requestAnimationFrame(animate);
