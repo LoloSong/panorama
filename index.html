@@ -55,13 +55,13 @@
         <audio autoplay loop src="audio/test.mp3" id="audio"></audio>
         <div id="VR"></div>
 		<script src="js/three.min.js"></script>
-		<!--<script src="js/Projector.js"></script>-->
 		<script src="js/tween.js"></script>
 		<script src="js/miaov.js"></script>
-		<script src="js/stereoeffect.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/stereoeffect.js"></script>
+		<script src="js/deviceorientationcontrols.js"></script>
+		<!--<script src="js/Projector.js"></script>-->
 		<!--<script src="js/OrbitControls.js" type="text/javascript" charset="utf-8"></script>-->
 		<!--<script src="js/THREEx.FullScreen.js" type="text/javascript" charset="utf-8"></script>-->
-		<script src="js/deviceorientationcontrols.js" type="text/javascript" charset="utf-8"></script>
 		<script>
 			var container;
 			var camera, scene, renderer;
@@ -161,11 +161,13 @@
                 renderer.domElement.addEventListener('mousemove', onDocumentMouseMove, false);
                 renderer.domElement.addEventListener('mouseup', onDocumentMouseUp, false);
                 renderer.domElement.addEventListener('mousewheel', onDocumentMouseWheel, false);
-                renderer.domElement.addEventListener('touchstart', onDocumentTouchStart, false );
-                renderer.domElement.addEventListener('touchmove', onDocumentTouchMove, false );
+                renderer.domElement.addEventListener('touchstart', onDocumentTouchStart, false);
+                renderer.domElement.addEventListener('touchmove', onDocumentTouchMove, false);
 
                 oFullScreen.addEventListener('click', fullScreen, false);
                 onDevice.addEventListener('click', controlDevice, false);
+
+                window.addEventListener('resize', onWindowResize, false);
 			}
 
             function onDocumentMouseDown(event){
@@ -242,6 +244,13 @@
                     });
                 }
             }
+
+            function onWindowResize(){
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                effect.setSize( window.innerWidth, window.innerHeight );
+			}
 
 			function animate(){
                 requestAnimationFrame(animate);
