@@ -85,6 +85,7 @@
                 isDeviceing = false,
                 isChanged = false,
 			    Status = 0;
+
 			init();
             animate();
 			function init(){
@@ -245,10 +246,16 @@
             }
 
             function onWindowResize(){
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth,  window.innerHeight);
-                effect.setSize(window.innerWidth,  window.innerHeight);
+                alert(window.innerWidth);
+//                var resizeWidth = window.innerWidth;
+//                var resizeHeight = window.innerHeight;
+//                if(winWidth != resizeWidth){
+//                    camera.aspect = resizeWidth / resizeHeight;
+//                    camera.updateProjectionMatrix();
+//                    renderer.setSize(resizeWidth, resizeHeight);
+//                    effect.setSize(resizeWidth, resizeHeight);
+//                    winWidth = resizeWidth;
+//                }
 			}
 
 			function animate(){
