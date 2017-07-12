@@ -63,6 +63,7 @@
 		<!--<script src="js/OrbitControls.js" type="text/javascript" charset="utf-8"></script>-->
 		<!--<script src="js/THREEx.FullScreen.js" type="text/javascript" charset="utf-8"></script>-->
 		<script>
+            console.log(window.orientation);
 			var container;
 			var camera, scene, renderer;
 			var target = new THREE.Vector3();
@@ -85,8 +86,6 @@
                 isDeviceing = false,
                 isChanged = false,
 			    Status = 0;
-            var winWidth = window.innerWidth,
-                winHeight = window.innerHeight;
 			init();
             animate();
 			function init(){
@@ -169,7 +168,7 @@
                 onDevice.addEventListener('click', controlDevice, false);
 
                 window.addEventListener('resize', onWindowResize, false);
-                window.addEventListener('orientationchange', onOrientationchange, false);
+                //window.addEventListener('orientationchange', onOrientationchange, false);
 			}
 
             function onDocumentMouseDown(event){
@@ -248,22 +247,27 @@
             }
 
             function onWindowResize(){
-//                camera.aspect = window.innerWidth / window.innerHeight;
-//                camera.updateProjectionMatrix();
-//                renderer.setSize(window.innerWidth, window.innerHeight);
-//                effect.setSize(window.innerWidth, window.innerHeight);
+                var winWidth = window.innerWidth;
+                var resize = setInterval(function(){
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    effect.setSize(window.innerWidth, window.innerHeight);
+                    if(winWidth == window.innerWidth){
+                        clearInterval(resize);
+                        console.log(1)
+                    }
+                },10);
 			}
 
 			function onOrientationchange(){
-                console.log(winWidth,winHeight);
-                camera.aspect = winHeight / winWidth;
-                camera.updateProjectionMatrix();
-                renderer.setSize(winHeight, winWidth);
-                effect.setSize(winHeight, winWidth);
-                setTimeout(function(){
-                    winWidth = window.innerWidth;
-                    winHeight = window.innerHeight;
-                },1000);
+                console.log(window.orientation);
+//                camera.aspect = winHeight / winWidth;
+//                camera.updateProjectionMatrix();
+//                renderer.setSize(winHeight, winWidth);
+//                effect.setSize(winHeight, winWidth);
+//                winWidth = window.innerWidth;
+//                winHeight = window.innerHeight;
             }
 
 			function animate(){
