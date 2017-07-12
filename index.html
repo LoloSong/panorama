@@ -255,11 +255,12 @@
 
 			function onOrientationchange(){
                 setTimeout(function(){
+                    alert(window.innerWidth);
                     camera.aspect = window.innerWidth / window.innerHeight;
                     camera.updateProjectionMatrix();
                     renderer.setSize(window.innerWidth, window.innerHeight);
                     effect.setSize(window.innerWidth, window.innerHeight);
-                },10)
+                },1000)
             }
 
 			function animate(){
