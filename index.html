@@ -168,6 +168,7 @@
                 onDevice.addEventListener('click', controlDevice, false);
 
                 window.addEventListener('resize', onWindowResize, false);
+                window.addEventListener('orientationchange', onOrientationchange, false);
 			}
 
             function onDocumentMouseDown(event){
@@ -246,17 +247,15 @@
             }
 
             function onWindowResize(){
-                alert(window.innerWidth);
-//                var resizeWidth = window.innerWidth;
-//                var resizeHeight = window.innerHeight;
-//                if(winWidth != resizeWidth){
-//                    camera.aspect = resizeWidth / resizeHeight;
-//                    camera.updateProjectionMatrix();
-//                    renderer.setSize(resizeWidth, resizeHeight);
-//                    effect.setSize(resizeWidth, resizeHeight);
-//                    winWidth = resizeWidth;
-//                }
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                effect.setSize(window.innerWidth, window.innerHeight);
 			}
+
+			function onOrientationchange(){
+                window.location.reload();
+            }
 
 			function animate(){
                 requestAnimationFrame(animate);
