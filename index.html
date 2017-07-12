@@ -35,6 +35,7 @@
                 color: #ffffff;
                 font-size: 40px;
                 text-align: center;
+                pointer-events: none;
             }
             #VR{
                 position: absolute;
@@ -63,7 +64,13 @@
 		<!--<script src="js/OrbitControls.js" type="text/javascript" charset="utf-8"></script>-->
 		<!--<script src="js/THREEx.FullScreen.js" type="text/javascript" charset="utf-8"></script>-->
 		<script>
-            console.log(window.orientation);
+            var hotPoint = [
+                {pos1X:-30,pos1Y:-70,pos1Z:-500,pos2X:-40,pos2Y:-90,pos2Z:-500,name:'c01',info:'进入场景二'},
+                {pos1X:400,pos1Y:0,pos1Z:-200,pos2X:390,pos2Y:-20,pos2Z:-200,name:'c02',info:'进入场景三'},
+                {pos1X:-250,pos1Y:-70,pos1Z:-100,pos2X:-260,pos2Y:-90,pos2Z:-100,name:'c03',info:'进入场景四'},
+                {pos1X:500,pos1Y:0,pos1Z:0,pos2X:510,pos2Y:-20,pos2Z:0,name:'c04',info:'进入场景五'},
+                {pos1X:-30,pos1Y:-70,pos1Z:-500,pos2X:-40,pos2Y:-90,pos2Z:-500,name:'c05',info:'进入场景一'}
+            ];
 			var container;
 			var camera, scene, renderer;
 			var target = new THREE.Vector3();
@@ -74,6 +81,9 @@
                 oTips = document.getElementById('tips'),
                 onDevice = document.getElementById('VR');
 			var Devices, effect;
+            var group = new THREE.Group();
+            var hotFont, hotImg, annie;
+            var clock = new THREE.Clock();
 			var lon = - 90,
 				lat = 0,
                 phi = 0,
@@ -92,6 +102,7 @@
 			    container = document.getElementById('container');
 			    //scene
 			    scene = new THREE.Scene();
+                scene.add(group);
 
 				//camera
 				camera = new THREE.PerspectiveCamera(140, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -132,7 +143,8 @@
                             .to({ x: 0, y: 0, z: -500}, 3000)
                             .easing(TWEEN.Easing.Exponential.InOut)
                             .start().onComplete(function(){
-
+                                group.add(hotFont);
+                                group.add(hotImg);
                         	});
                         clearInterval(timer);
                         timer = setInterval(function(){
@@ -147,7 +159,10 @@
                     },1000);
 				});
 
-				//Devices
+                //HotPoint
+                createHotPoint(hotPoint[0]);
+
+                //Devices
                 Devices = new THREE.DeviceOrientationControls(camera);
                 Devices.connect();
 
@@ -168,8 +183,141 @@
                 onDevice.addEventListener('click', controlDevice, false);
 
                 window.addEventListener('resize', onWindowResize, false);
-                //window.addEventListener('orientationchange', onOrientationchange, false);
 			}
+
+			function createHotPoint(hotPoint){
+			    //hotFont
+			    hotFont = makeTextSprite(
+			        hotPoint.info,
+                    {
+                        color: 'rgba(255,255,255,1)',
+                        fontSize: 50,
+                        borderColor: 'rgba(100,100,100,0.8)',
+                        backgroundColor: 'rgba(150,150,150,0.5)'
+
+                    }
+                );
+			    hotFont.position.set(hotPoint.pos1X,hotPoint.pos1Y,hotPoint.pos1Z)
+                //hotImg
+                var textureLoader = new THREE.TextureLoader();
+                var map = textureLoader.load( "img/spot14.png");
+                var material =  new THREE.SpriteMaterial({
+                    map: map,
+                    color: 0xffffff,
+                    fog: true
+                });
+                annie = new TextureAnimator( map, 1, 25, 25, 75 );
+                hotImg = new THREE.Sprite(material);
+                hotImg.position.set(hotPoint.pos2X,hotPoint.pos2Y,hotPoint.pos2Z);
+                hotImg.scale.set( 50, 50, 1 );
+                hotImg.name = hotPoint.name;
+            }
+
+            function makeTextSprite(message, parameters){
+			    if(parameters === undefined){
+			        parameters = {};
+                }
+			    var color = parameters.hasOwnProperty('color') ? parameters['color'] : 'rgba(255,255,255,1)';
+			    var fontFace = parameters.hasOwnProperty('fontFace') ? parameters['fontFace'] : 'Arial';
+			    var fontSize = parameters.hasOwnProperty('fontSize') ? parameters['fontSize'] : 16;
+                var borderThickness = parameters.hasOwnProperty("borderThickness") ? parameters["borderThickness"] : 1;
+			    var borderColor = parameters.hasOwnProperty('borderColor') ? parameters['borderColor'] : 'rgba(0,0,0,1)';
+			    var backgroundColor = parameters.hasOwnProperty('backgroundColor') ? parameters['backgroundColor'] : 'rgba(255,255,255,1)';
+
+			    var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
+                context.font = 'Normal ' + fontSize + 'px ' + fontFace;
+
+                var textWidth = context.measureText(message).width;
+
+                //background color
+                context.fillStyle = backgroundColor;
+                //border color
+                context.strokeStyle = borderColor;
+                //borderRadius
+                context.LineWidth = borderThickness;
+                roundRect(
+                    context,
+                    borderThickness / 2,
+                    borderThickness / 2,
+                    textWidth + borderThickness,
+                    fontSize * 1.4 + borderThickness,
+                    2
+                );
+
+                //text color
+                context.fillStyle = color;
+                context.fillText(
+                    message,
+                    borderThickness,
+                    fontSize + borderThickness
+                );
+
+                var texture = new THREE.Texture(canvas);
+                texture.needsUpdate = true;
+                var spriteMaterial = new THREE.SpriteMaterial({
+                    map: texture,
+                    useScreenCoordinates: false
+                });
+                var sprite = new THREE.Sprite(spriteMaterial);
+                sprite.scale.set(100,50,1);
+                return sprite;
+            }
+
+            function roundRect(ctx, x, y, w, h, r){
+                ctx.beginPath();
+                ctx.moveTo(x+r, y);
+                ctx.lineTo(x+w-r, y);
+                ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+                ctx.lineTo(x+w, y+h-r);
+                ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+                ctx.lineTo(x+r, y+h);
+                ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+                ctx.lineTo(x, y+r);
+                ctx.quadraticCurveTo(x, y, x+r, y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration){
+                // note: texture passed by reference, will be updated by the update function.
+
+                this.tilesHorizontal = tilesHoriz;
+                this.tilesVertical = tilesVert;
+                // how many images does this spritesheet contain?
+                //  usually equals tilesHoriz * tilesVert, but not necessarily,
+                //  if there at blank tiles at the bottom of the spritesheet.
+                this.numberOfTiles = numTiles;
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set( 1 / this.tilesHorizontal, 1 / this.tilesVertical );
+
+                // how long should each image be displayed?
+                this.tileDisplayDuration = tileDispDuration;
+
+                // how long has the current image been displayed?
+                this.currentDisplayTime = 0;
+
+                // which image is currently being displayed?
+                this.currentTile = 0;
+
+                this.update = function( milliSec )
+                {
+                    this.currentDisplayTime += milliSec;
+                    while (this.currentDisplayTime > this.tileDisplayDuration)
+                    {
+                        this.currentDisplayTime -= this.tileDisplayDuration;
+                        this.currentTile++;
+
+                        var currentColumn = this.currentTile % this.tilesHorizontal;
+                        texture.offset.x = currentColumn / this.tilesHorizontal;
+                        var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+                        texture.offset.y = currentRow / this.tilesVertical;
+                        if (this.currentTile == this.numberOfTiles)
+                            this.currentTile = 0;
+                    }
+                };
+            }
 
             function onDocumentMouseDown(event){
                 event.preventDefault();
@@ -258,16 +406,6 @@
                 },1000);
 			}
 
-			function onOrientationchange(){
-                console.log(window.orientation);
-//                camera.aspect = winHeight / winWidth;
-//                camera.updateProjectionMatrix();
-//                renderer.setSize(winHeight, winWidth);
-//                effect.setSize(winHeight, winWidth);
-//                winWidth = window.innerWidth;
-//                winHeight = window.innerHeight;
-            }
-
 			function animate(){
                 requestAnimationFrame(animate);
                 if(isDeviceing === false){
@@ -275,6 +413,9 @@
                 }
                 render();
                 TWEEN.update();
+
+                var delta = clock.getDelta();
+                annie.update(2000 * delta);
 
                 if(isDeviceing === false && Status === 1){
                     lat = Math.max(-89, Math.min(89, lat));
