@@ -247,14 +247,19 @@
             }
 
             function onWindowResize(){
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                effect.setSize(window.innerWidth, window.innerHeight);
+//                camera.aspect = window.innerWidth / window.innerHeight;
+//                camera.updateProjectionMatrix();
+//                renderer.setSize(window.innerWidth, window.innerHeight);
+//                effect.setSize(window.innerWidth, window.innerHeight);
 			}
 
 			function onOrientationchange(){
-                window.location.reload();
+                setTimeout(function(){
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    effect.setSize(window.innerWidth, window.innerHeight);
+                },10)
             }
 
 			function animate(){
