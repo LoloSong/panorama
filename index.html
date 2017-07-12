@@ -248,15 +248,16 @@
             }
 
             function onWindowResize(){
-                var resizeWidth = window.innerWidth;
-                var resizeHeight = window.innerHeight;
-                if(winWidth != resizeWidth){
-                    camera.aspect = resizeWidth / resizeHeight;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(resizeWidth, resizeHeight);
-                    effect.setSize(resizeWidth, resizeHeight);
-                    winWidth = resizeWidth;
-                }
+                alert(window.innerWidth);
+//                var resizeWidth = window.innerWidth;
+//                var resizeHeight = window.innerHeight;
+//                if(winWidth != resizeWidth){
+//                    camera.aspect = resizeWidth / resizeHeight;
+//                    camera.updateProjectionMatrix();
+//                    renderer.setSize(resizeWidth, resizeHeight);
+//                    effect.setSize(resizeWidth, resizeHeight);
+//                    winWidth = resizeWidth;
+//                }
 			}
 
 			function animate(){
