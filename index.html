@@ -247,13 +247,15 @@
             }
 
             function onWindowResize(){
-                var winWidth = window.innerWidth;
                 var resize = setInterval(function(){
                     camera.aspect = window.innerWidth / window.innerHeight;
                     camera.updateProjectionMatrix();
                     renderer.setSize(window.innerWidth, window.innerHeight);
                     effect.setSize(window.innerWidth, window.innerHeight);
                 },10);
+                setTimeout(function(){
+                    clearInterval(resize);
+                },1000);
 			}
 
 			function onOrientationchange(){
