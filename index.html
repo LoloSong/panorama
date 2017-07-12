@@ -52,7 +52,7 @@
 		<div id="container"></div>
         <div id="fullScreen"></div>
         <div id="tips">声音已开启</div>
-        <audio autoplay loop src="audio/test.mp3" id="audio"></audio>
+        <!--<audio autoplay loop src="audio/test.mp3" id="audio"></audio>-->
         <div id="VR"></div>
 		<script src="js/three.min.js"></script>
 		<script src="js/tween.js"></script>
@@ -164,10 +164,11 @@
                 renderer.domElement.addEventListener('touchstart', onDocumentTouchStart, false);
                 renderer.domElement.addEventListener('touchmove', onDocumentTouchMove, false);
 
-                oFullScreen.addEventListener('click', fullScreen, false);
+//                oFullScreen.addEventListener('click', fullScreen, false);
                 onDevice.addEventListener('click', controlDevice, false);
 
                 window.addEventListener('resize', onWindowResize, false);
+                window.addEventListener('orientationchange', onorientationchange, false);
 			}
 
             function onDocumentMouseDown(event){
@@ -251,6 +252,13 @@
                 renderer.setSize( window.innerWidth, window.innerHeight );
                 effect.setSize( window.innerWidth, window.innerHeight );
 			}
+
+			function onorientationchange(){
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight);
+                effect.setSize( window.innerWidth, window.innerHeight);
+            }
 
 			function animate(){
                 requestAnimationFrame(animate);
