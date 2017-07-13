@@ -81,10 +81,12 @@
                 oTips = document.getElementById('tips'),
                 onDevice = document.getElementById('VR');
 			var Devices, effect;
-            var group = new THREE.Group();
             var hotFont, hotImg, annie;
+            var group = new THREE.Group();
             var clock = new THREE.Clock();
-			var lon = - 90,
+            var raycaster = new THREE.Raycaster();
+            var intersects;
+            var lon = - 90,
 				lat = 0,
                 phi = 0,
                 theta,
@@ -183,6 +185,8 @@
                 onDevice.addEventListener('click', controlDevice, false);
 
                 window.addEventListener('resize', onWindowResize, false);
+                document.addEventListener('mouseup', myClick, false);
+                document.addEventListener('touchend', myClick, false);
 			}
 
 			function createHotPoint(hotPoint){
@@ -404,6 +408,94 @@
                 setTimeout(function(){
                     clearInterval(resize);
                 },1000);
+			}
+
+			function myClick(event){
+                event.preventDefault();
+                if(isDeviceing === false && Status === 1){
+                    var mouse = new THREE.Vector2();
+                    if(event.changedTouches){
+                        mouse.x = ( event.changedTouches[0].clientX / window.innerWidth ) * 2 - 1;
+                        mouse.y = - ( event.changedTouches[0].clientY / window.innerHeight ) * 2 + 1;
+                    }else{
+                        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                    }
+                    raycaster.setFromCamera( mouse, camera );
+                    intersects = raycaster.intersectObjects(group.children);
+                    if(intersects.length > 0){
+                        //点击场景一
+						if(intersects[0].object.name == 'c01'){
+						    group.remove(hotFont);
+						    group.remove(hotImg);
+						    Status = 0;
+						    createHotPoint(hotPoint[1]);
+						    var texture = new THREE.TextureLoader().load('lande/c03.jpg',function(){
+                                Status = 1;
+                                mesh.material.map = texture;
+                                mesh.material.needsUpdate = true;
+                                group.add(hotFont);
+                                group.add(hotImg);
+                            })
+						}
+						//进入场景二
+                        if(intersects[0].object.name == 'c02'){
+                            group.remove(hotFont);
+                            group.remove(hotImg);
+                            Status = 0;
+                            createHotPoint(hotPoint[2]);
+                            var texture = new THREE.TextureLoader().load('lande/c02.jpg',function(){
+                                Status = 1;
+                                mesh.material.map = texture;
+                                mesh.material.needsUpdate = true;
+                                group.add(hotFont);
+                                group.add(hotImg);
+                            })
+                        }
+                        //进入场景三
+                        if(intersects[0].object.name == 'c03'){
+                            group.remove(hotFont);
+                            group.remove(hotImg);
+                            Status = 0;
+                            createHotPoint(hotPoint[3]);
+                            var texture = new THREE.TextureLoader().load('lande/c04.jpg',function(){
+                                Status = 1;
+                                mesh.material.map = texture;
+                                mesh.material.needsUpdate = true;
+                                group.add(hotFont);
+                                group.add(hotImg);
+                            })
+                        }
+                        //进入场景四
+                        if(intersects[0].object.name == 'c04'){
+                            group.remove(hotFont);
+                            group.remove(hotImg);
+                            Status = 0;
+                            createHotPoint(hotPoint[4]);
+                            var texture = new THREE.TextureLoader().load('lande/c05.jpg',function(){
+                                Status = 1;
+                                mesh.material.map = texture;
+                                mesh.material.needsUpdate = true;
+                                group.add(hotFont);
+                                group.add(hotImg);
+                            })
+                        }
+                        //进入场景五
+                        if(intersects[0].object.name == 'c05'){
+                            group.remove(hotFont);
+                            group.remove(hotImg);
+                            Status = 0;
+                            createHotPoint(hotPoint[0]);
+                            var texture = new THREE.TextureLoader().load('lande/c01.jpg',function(){
+                                Status = 1;
+                                mesh.material.map = texture;
+                                mesh.material.needsUpdate = true;
+                                group.add(hotFont);
+                                group.add(hotImg);
+                            })
+                        }
+					}
+				}
 			}
 
 			function animate(){
